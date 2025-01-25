@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Chatbot</title>
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .chat-container {
+      background-color: #fff;
+      width: 100%;
+      max-width: 450px;
+      min-height: 500px;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .chat-header {
+      font-size: 20px;
+      font-weight: bold;
+      color: #007bff;
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .chat-box {
+      max-height: 350px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      flex-grow: 1;
+      padding-right: 10px;
+      padding-left: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+      background-color: #007bff;
+      border-radius: 10px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb:hover {
+      background-color: #0056b3;
+    }
+
+    .chat-message {
+      padding: 12px 18px;
+      border-radius: 15px;
+      margin: 8px 0;
+      font-size: 16px;
+      line-height: 1.5;
+      max-width: 80%;
+      word-wrap: break-word;
+      display: block;
+      opacity: 0;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    .bot-message {
+      background-color: #e9ecef;
+      text-align: left;
+      border-radius: 12px 12px 12px 0;
+      margin-right: auto; /* Align to left */
+      padding: 12px;
+      margin-left: 5%;
+    }
+
+    .user-message {
+      background-color: #007bff;
+      color: white;
+      text-align: right;
+      border-radius: 12px 12px 0 12px;
+      margin-left: auto; /* Align to right */
+      padding: 12px;
+      margin-right: 5%;
+    }
+
+    .bot-typing {
+      background-color: #f1f1f1;
+      color: #999;
+      text-align: left;
+      font-style: italic;
+      padding: 10px 18px;
+      border-radius: 12px;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    input[type="text"] {
+      width: calc(100% - 50px);
+      padding: 12px 18px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      outline: none;
+      transition: all 0.3s ease-in-out;
+    }
+
+    input[type="text"]:focus {
+      border-color: #007bff;
+    }
+
+    .send-button {
+      background-color: #007bff;
+      color: white;
+      font-size: 24px;
+      border: none;
+      cursor: pointer;
+      padding: 12px;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      margin-left: 10px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .send-button:hover {
+      background-color: #0056b3;
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media screen and (max-width: 600px) {
+      .chat-container {
+        width: 90%;
+        padding: 15px;
+      }
+
+      input[type="text"] {
+        width: calc(100% - 60px);
+      }
+
+      .send-button {
+        width: 48px;
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Personal Chatbot</div>
+    <div class="chat-box" id="chatBox">
+      <div class="chat-message bot-message">
+        <span>👋 Hi there! How can I assist you today?</span>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <input type="text" id="userInput" placeholder="Type a message..." />
+      <button class="send-button" onclick="sendMessage()">
+        <span class="material-icons">send</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Map of keywords to responses
+    const responses = {
+      "hello": "Hi there! How can I help you?",
+      "your name": "I'm your personal chatbot!",
+      "how are you": "I'm doing great, thank you for asking!",
+      "bye": "Goodbye! Have a great day!",
+      "default": "Sorry, I don't understand that. Can you try again?"
+    };
+
+    // Event listener for the "Enter" key
+    document.getElementById('userInput').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        sendMessage();  // Call the sendMessage function when Enter is pressed
+      }
+    });
+
+    function sendMessage() {
+      const userInput = document.getElementById('userInput').value.trim();
+      if (userInput === "") return;
+
+      // Display the user's message
+      const chatBox = document.getElementById('chatBox');
+      const userMessage = document.createElement('div');
+      userMessage.classList.add('chat-message', 'user-message');
+      userMessage.innerHTML = `<span>${userInput}</span>`;
+      chatBox.appendChild(userMessage);
+
+      // Show typing indicator
+      const typingIndicator = document.createElement('div');
+      typingIndicator.classList.add('chat-message', 'bot-typing');
+      typingIndicator.innerHTML = `<span>Bot is typing...</span>`;
+      chatBox.appendChild(typingIndicator);
+
+      // Scroll to the bottom of the chat box
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Clear the input field
+      document.getElementById('userInput').value = '';
+
+      // Simulate a bot response after a delay
+      setTimeout(() => {
+        // Remove the typing indicator
+        typingIndicator.remove();
+
+        // Get bot response and display it
+        const botResponse = getBotResponse(userInput.toLowerCase());
+        const botMessage = document.createElement('div');
+        botMessage.classList.add('chat-message', 'bot-message');
+        botMessage.innerHTML = `<span>${botResponse}</span>`;
+        chatBox.appendChild(botMessage);
+
+        // Scroll to the bottom of the chat box again
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 1500); // 1.5 seconds delay to simulate typing
+    }
+
+    // Get bot response using the mapping
+    function getBotResponse(userInput) {
+      return responses[userInput] || responses["default"];
+    }
+  </script>
+</body>
+</html>
